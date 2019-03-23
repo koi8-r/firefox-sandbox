@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -eu -o pipefail
+
+docker image ls -q firefox-sandbox | grep . || docker build -t firefox-sandbox - < "$(dirname "$(readlink -f "$0")")"/firefox-sandbox.dockerfile || exit -1
+
+xhost +local:nobody>/dev/null \
+&& docker run -ti -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v "$HOME/.Xauthority":/home/nobody/.Xauthority firefox-sandbox firefox --private-window "${*:-https://www.google.com/}" \
+|| exit -1
